@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+
 const merchantSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -26,14 +27,15 @@ const merchantSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'active', 'blocked', 'inactive'],
+    enum: ['pending', 'pendingAdminApproval', 'active', 'blocked', 'inactive'],
     default: 'pending',
   },
   validationCode: {
     type: String,
-    required: [true],
+    required: true,
   },
 });
+
 merchantSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -41,5 +43,6 @@ merchantSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
+
 const Merchant = mongoose.model('merchants', merchantSchema);
 module.exports = Merchant;
