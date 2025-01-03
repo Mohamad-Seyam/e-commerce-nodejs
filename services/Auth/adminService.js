@@ -9,8 +9,11 @@ const sendEmail = require('../../utils/emails');
 exports.signup = async (adminData) => {
   try {
     const admin = await adminRepository.createAdmin({ ...adminData });
+
     const token = sharedAuthService.createToken(admin);
+
     admin.password = undefined;
+
     return {
       admin,
       token,
@@ -23,9 +26,11 @@ exports.signup = async (adminData) => {
 exports.login = async (email, password) => {
   try {
     const admin = await Admin.findOne({ email }).select('+password');
+
     if (admin) {
       const pass = bcrypt.compare(password, admin.password);
       admin.password = undefined;
+
       if (pass) {
         const token = sharedAuthService.createToken(admin);
         return { admin, token };
@@ -40,20 +45,23 @@ exports.login = async (email, password) => {
 exports.forgetPassword = async (email) => {
   try {
     const admin = await Admin.findOne({ email });
+
     if (!admin) {
       throw new AppError('Email is not exist!', 400);
     }
-    const code = ValidationCode.generateCode();
+
+    const newValidationCode = ValidationCode.generateCode();
     await Admin.updateOne(admin, {
-      validationCode: code,
+      validationCode: newValidationCode,
       password: undefined,
     });
+
     sendEmail({
-      email: newUser.email,
+      email: admin.email,
       subject: 'Welcome to our E-Commerce Platform!',
       template: 'reset-password-validation-code', // Use only the template name without the file extension
       data: {
-        validationCode: code,
+        validationCode: newValidationCode,
       },
     });
   } catch (err) {
@@ -64,6 +72,7 @@ exports.forgetPassword = async (email) => {
 exports.validateAdminCode = async (email, code) => {
   try {
     const admin = await Admin.findOne({ email });
+
     if (!admin || code !== admin.validationCode) {
       throw new AppError('Invalid code!', 400);
     }
@@ -76,6 +85,7 @@ exports.validateAdminCode = async (email, code) => {
 exports.setNewPassword = async (email, code, password) => {
   try {
     const admin = await this.validateAdminCode(email, code);
+
     const pass = await bcrypt.hash(password, 12);
     return await Admin.updateOne(admin, {
       password: pass,
