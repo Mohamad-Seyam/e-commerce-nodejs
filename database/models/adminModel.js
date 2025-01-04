@@ -23,16 +23,18 @@ const adminSchema = mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password can not be empty!'],
+    select: false,
   },
   validationCode: {
     type: String,
+    select: false,
   },
 });
 
 adminSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
-  
+
   next();
 });
 
