@@ -4,7 +4,7 @@ const adminValidation = require('../../validationSchemas/Auth/adminValidation');
 const adminAuthController = require('../../controllers/Auth/adminController');
 const authorization = require('../../middlewares/authorization');
 const { accessMiddleware } = require('../../middlewares/accessMiddleware');
-const categoryValidation = require('../../validationSchemas/Auth/categoryValidation');
+const categoryValidation = require('../../validationSchemas/Categories/categoryValidation');
 
 const adminRouter = express.Router();
 const validation = validationMiddlewares.validateSchema;
@@ -189,10 +189,5 @@ adminRouter.get(
   accessMiddleware('admin'),
   adminAuthController.deleteMerchant
 );
-
-// #Products
-
-// approve product
-adminRouter.get('');
 
 module.exports = adminRouter;
